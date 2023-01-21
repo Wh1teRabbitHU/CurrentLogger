@@ -57,6 +57,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define FAKE_CD_Pin GPIO_PIN_2
+#define FAKE_CD_GPIO_Port GPIOC
 #define PATH_0_EN_Pin GPIO_PIN_0
 #define PATH_0_EN_GPIO_Port GPIOA
 #define PATH_1_EN_Pin GPIO_PIN_1
@@ -100,8 +102,8 @@ void Error_Handler(void);
 #define USER_BTN_3_Pin GPIO_PIN_10
 #define USER_BTN_3_GPIO_Port GPIOA
 #define USER_BTN_3_EXTI_IRQn EXTI15_10_IRQn
-#define SD_CD_Pin GPIO_PIN_15
-#define SD_CD_GPIO_Port GPIOA
+#define DETECT_SD_CARD_Pin GPIO_PIN_15
+#define DETECT_SD_CARD_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

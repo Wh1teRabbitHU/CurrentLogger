@@ -145,9 +145,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    uint8_t sdCardStatus = HAL_GPIO_ReadPin(SD_CD_GPIO_Port, SD_CD_Pin);
-
-    HAL_GPIO_WritePin(SIGNAL_LED_5_GPIO_Port, SIGNAL_LED_5_Pin, sdCardStatus);
 
     HAL_Delay(100);
     /* USER CODE END WHILE */
@@ -327,6 +324,12 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, SIGNAL_LED_2_Pin|SIGNAL_LED_3_Pin|SIGNAL_LED_4_Pin|SIGNAL_LED_5_Pin
                           |TEST_LOAD_1_Pin|TEST_LOAD_2_Pin|TEST_LOAD_3_Pin|TEST_LOAD_4_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin : FAKE_CD_Pin */
+  GPIO_InitStruct.Pin = FAKE_CD_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(FAKE_CD_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PATH_0_EN_Pin PATH_1_EN_Pin PATH_2_EN_Pin PATH_3_EN_Pin
                            PATH_4_EN_Pin */
   GPIO_InitStruct.Pin = PATH_0_EN_Pin|PATH_1_EN_Pin|PATH_2_EN_Pin|PATH_3_EN_Pin
@@ -358,11 +361,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SD_CD_Pin */
-  GPIO_InitStruct.Pin = SD_CD_Pin;
+  /*Configure GPIO pin : DETECT_SD_CARD_Pin */
+  GPIO_InitStruct.Pin = DETECT_SD_CARD_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(SD_CD_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(DETECT_SD_CARD_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
@@ -386,9 +389,6 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1)
-  {
-  }
   /* USER CODE END Error_Handler_Debug */
 }
 

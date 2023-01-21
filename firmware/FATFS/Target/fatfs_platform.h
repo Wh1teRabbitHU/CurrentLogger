@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2022 STMicroelectronics.
+  * Copyright (c) 2023 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -21,7 +21,7 @@
 /* Defines ------------------------------------------------------------------*/
 #define SD_PRESENT               ((uint8_t)0x01)  /* also in bsp_driver_sd.h */
 #define SD_NOT_PRESENT           ((uint8_t)0x00)  /* also in bsp_driver_sd.h */
-#define SD_DETECT_PIN         GPIO_PIN_15
-#define SD_DETECT_GPIO_PORT   GPIOA
+#define SD_DETECT_PIN         GPIO_PIN_2
+#define SD_DETECT_GPIO_PORT   GPIOC
 /* Prototypes ---------------------------------------------------------------*/
 uint8_t	BSP_PlatformIsDetected(void);
