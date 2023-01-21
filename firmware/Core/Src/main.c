@@ -119,25 +119,25 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
-  SDCard_capacity capacity = {0};
-
-  SDCard_mount("/");
-  SDCard_checkCapacity(&capacity);
-  result = SDCard_createFile("FILE1.TXT");
-
-  if (result != FR_OK) {
-	  Error_Handler();
-  }
-
-  result = SDCard_createFile("FILE2.TXT");
-
-  if (result != FR_OK) {
-	  Error_Handler();
-  }
-
-  SDCard_unmount("/");
-
-  Debug_write(debugBuffer, sizeof(debugBuffer));
+//  SDCard_capacity capacity = {0};
+//
+//  SDCard_mount("/");
+//  SDCard_checkCapacity(&capacity);
+//  result = SDCard_createFile("FILE1.TXT");
+//
+//  if (result != FR_OK) {
+//	  Error_Handler();
+//  }
+//
+//  result = SDCard_createFile("FILE2.TXT");
+//
+//  if (result != FR_OK) {
+//	  Error_Handler();
+//  }
+//
+//  SDCard_unmount("/");
+//
+//  Debug_write(debugBuffer, sizeof(debugBuffer));
 
   /* USER CODE END 2 */
 
@@ -145,8 +145,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    USBD_StatusTypeDef status = CDC_Transmit_FS(usbBuffer, sizeof(usbBuffer));
 
-    HAL_Delay(100);
+    HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
