@@ -23,7 +23,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "sd_card.h"
+#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,7 +64,25 @@ static void MX_SPI1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+char buffer[100];
+int counter = 0;
+FRESULT result;
+uint8_t usbBuffer[] = "Hello USB!\n\r";
+uint8_t debugBuffer[] = "Hello Debugger!\n\r";
 
+int Debug_write(uint8_t * pointer, uint16_t length) {
+	uint16_t i;
+
+	for (i = 0; i < length; i++) {
+		ITM_SendChar(*pointer++);
+	}
+
+	return i;
+}
+
+void SDCard_debug(char *log) {
+//	HAL_UART_Transmit(&huart2, (uint8_t *)log, strlen(log), HAL_MAX_DELAY);
+}
 /* USER CODE END 0 */
 
 /**
@@ -100,6 +119,25 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
+  SDCard_capacity capacity = {0};
+
+  SDCard_mount("/");
+  SDCard_checkCapacity(&capacity);
+  result = SDCard_createFile("FILE1.TXT");
+
+  if (result != FR_OK) {
+	  Error_Handler();
+  }
+
+  result = SDCard_createFile("FILE2.TXT");
+
+  if (result != FR_OK) {
+	  Error_Handler();
+  }
+
+  SDCard_unmount("/");
+
+  Debug_write(debugBuffer, sizeof(debugBuffer));
 
   /* USER CODE END 2 */
 
@@ -107,6 +145,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    uint8_t sdCardStatus = HAL_GPIO_ReadPin(SD_CD_GPIO_Port, SD_CD_Pin);
+
+    HAL_GPIO_WritePin(SIGNAL_LED_5_GPIO_Port, SIGNAL_LED_5_Pin, sdCardStatus);
+
+    HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -135,9 +178,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 168;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
-  RCC_OscInitStruct.PLL.PLLQ = 7;
+  RCC_OscInitStruct.PLL.PLLN = 72;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 3;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -212,7 +255,7 @@ static void MX_SDIO_SD_Init(void)
   hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 0;
+  hsd.Init.ClockDiv = 12;
   /* USER CODE BEGIN SDIO_Init 2 */
 
   /* USER CODE END SDIO_Init 2 */
@@ -278,10 +321,7 @@ static void MX_GPIO_Init(void)
                           |PATH_4_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, ADC_CS_Pin|ADC_INT_Pin|ADC_CONVST_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SIGNAL_LED_1_GPIO_Port, SIGNAL_LED_1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, ADC_CS_Pin|SIGNAL_LED_1_Pin|ADC_INT_Pin|ADC_CONVST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SIGNAL_LED_2_Pin|SIGNAL_LED_3_Pin|SIGNAL_LED_4_Pin|SIGNAL_LED_5_Pin

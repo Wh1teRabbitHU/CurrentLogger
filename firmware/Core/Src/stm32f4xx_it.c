@@ -204,7 +204,11 @@ void SysTick_Handler(void)
 void EXTI9_5_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+//  uint8_t btn1State = !HAL_GPIO_ReadPin(USER_BTN_1_GPIO_Port, USER_BTN_1_Pin);
+//  uint8_t btn2State = !HAL_GPIO_ReadPin(USER_BTN_2_GPIO_Port, USER_BTN_2_Pin);
 
+  HAL_GPIO_TogglePin(SIGNAL_LED_1_GPIO_Port, SIGNAL_LED_1_Pin);
+  HAL_GPIO_TogglePin(PATH_0_EN_GPIO_Port, PATH_0_EN_Pin);
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(USER_BTN_1_Pin);
   HAL_GPIO_EXTI_IRQHandler(USER_BTN_2_Pin);
@@ -219,7 +223,7 @@ void EXTI9_5_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-
+//  uint8_t btn3State = !HAL_GPIO_ReadPin(USER_BTN_3_GPIO_Port, USER_BTN_3_Pin);
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(SIGNAL_LED_5_Pin);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
