@@ -36,8 +36,10 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
+Core/Src/binary.c \
 Core/Src/lcd_display.c \
 Core/Src/main.c \
+Core/Src/mcp3421.c \
 Core/Src/sd_card.c \
 Core/Src/stm32f4xx_hal_msp.c \
 Core/Src/stm32f4xx_it.c \

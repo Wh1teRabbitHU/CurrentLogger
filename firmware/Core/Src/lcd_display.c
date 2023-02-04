@@ -4,8 +4,10 @@ void lcd_write_i2c(char saddr,uint8_t *buffer, uint8_t length) {
 	while (I2C1->SR2 & I2C_SR2_BUSY);
 	I2C1->CR1 |= I2C_CR1_START;
 	while (!(I2C1->SR1 & I2C_SR1_SB));
+	volatile int Temp;
 	I2C1->DR = saddr<< 1;
 	while (!(I2C1->SR1 & I2C_SR1_ADDR));
+	Temp = I2C1->SR2;
 
 	for (uint8_t i=0;i<length;i++) {
 		I2C1->DR=buffer[i];

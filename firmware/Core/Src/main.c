@@ -26,6 +26,7 @@
 #include "sd_card.h"
 #include "usbd_cdc_if.h"
 #include "lcd_display.h"
+#include "mcp3421.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -140,8 +141,18 @@ int main(void)
 //
 //  Debug_write(debugBuffer, sizeof(debugBuffer));
 
-  lcd_init();
-	lcd_clear();
+  // lcd_init();
+	// lcd_clear();
+
+  MCP3421_config config = {0};
+
+  config.mode = MCP3421_MODE_CONTINUOUS;
+  config.sampleRate = MCP3421_RATE_003_75;
+  config.gain = MCP3421_GAIN_1X;
+
+  MCP3421_writeConfig(&hi2c1, &config);
+  HAL_Delay(100);
+  char Buffer[25];
 
   /* USER CODE END 2 */
 
@@ -149,11 +160,23 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    setCursor(0,0);
-		lcd_send_string("Hello LCD");
-    USBD_StatusTypeDef status = CDC_Transmit_FS(usbBuffer, sizeof(usbBuffer));
+    // setCursor(0,0);
+		// lcd_send_string("Hello LCD");
+    // USBD_StatusTypeDef status = CDC_Transmit_FS(usbBuffer, sizeof(usbBuffer));
 
-    HAL_Delay(1000);
+    // for (uint8_t i = 1; i<128; i++) {
+    //   uint8_t ret = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(i<<1), 3, 5);
+
+    //   if (ret == HAL_OK) {
+    //     sprintf(Buffer, "0x%X", i);
+    //     CDC_Transmit_FS(Buffer, sizeof(Buffer));
+    //   }
+    // }
+    uint32_t measurement = MCP3421_readMeasurement(&hi2c1);
+    sprintf(Buffer, "Measurement: %dmV\n", measurement);
+    CDC_Transmit_FS(Buffer, sizeof(Buffer));
+
+    HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
