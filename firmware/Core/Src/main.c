@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "sd_card.h"
 #include "usbd_cdc_if.h"
+#include "lcd_display.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -139,12 +140,17 @@ int main(void)
 //
 //  Debug_write(debugBuffer, sizeof(debugBuffer));
 
+  lcd_init();
+	lcd_clear();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    setCursor(0,0);
+		lcd_send_string("Hello LCD");
     USBD_StatusTypeDef status = CDC_Transmit_FS(usbBuffer, sizeof(usbBuffer));
 
     HAL_Delay(1000);
