@@ -32,3 +32,6 @@
 *.app
 
 firmware/Debug
+firmware/build
+
+*.bak

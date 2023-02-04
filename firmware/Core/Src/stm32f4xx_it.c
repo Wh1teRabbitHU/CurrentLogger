@@ -225,7 +225,7 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 //  uint8_t btn3State = !HAL_GPIO_ReadPin(USER_BTN_3_GPIO_Port, USER_BTN_3_Pin);
   /* USER CODE END EXTI15_10_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(SIGNAL_LED_5_Pin);
+  HAL_GPIO_EXTI_IRQHandler(USER_BTN_3_Pin);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
   /* USER CODE END EXTI15_10_IRQn 1 */
@@ -248,4 +248,3 @@ void OTG_FS_IRQHandler(void)
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */
-
