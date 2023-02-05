@@ -36,6 +36,7 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
+Core/Src/ads7280.c \
 Core/Src/binary.c \
 Core/Src/lcd_display.c \
 Core/Src/main.c \

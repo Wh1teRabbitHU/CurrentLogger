@@ -69,6 +69,12 @@ void Error_Handler(void);
 #define PATH_3_EN_GPIO_Port GPIOA
 #define PATH_4_EN_Pin GPIO_PIN_4
 #define PATH_4_EN_GPIO_Port GPIOA
+#define ADC_CLK_Pin GPIO_PIN_5
+#define ADC_CLK_GPIO_Port GPIOA
+#define ADC_SDI_Pin GPIO_PIN_6
+#define ADC_SDI_GPIO_Port GPIOA
+#define ADC_SDO_Pin GPIO_PIN_7
+#define ADC_SDO_GPIO_Port GPIOA
 #define ADC_CS_Pin GPIO_PIN_4
 #define ADC_CS_GPIO_Port GPIOC
 #define SIGNAL_LED_1_Pin GPIO_PIN_5

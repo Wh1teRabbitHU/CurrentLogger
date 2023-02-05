@@ -69,5 +69,5 @@ uint32_t MCP3421_readMeasurement(I2C_HandleTypeDef * i2c) {
 	measurement = measurement | buffer[1] << 8;
 	measurement = measurement | ((buffer[0] << 16) & 0b11);
 
-	return measurement * 0.2;
+	return measurement * 0.25;
 }

@@ -27,6 +27,7 @@
 #include "usbd_cdc_if.h"
 #include "lcd_display.h"
 #include "mcp3421.h"
+#include "ads7280.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,8 +49,6 @@
 
 SD_HandleTypeDef hsd;
 
-SPI_HandleTypeDef hspi1;
-
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -59,7 +58,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SDIO_SD_Init(void);
-static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -117,7 +115,6 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_SDIO_SD_Init();
-  MX_SPI1_Init();
   MX_USB_DEVICE_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
@@ -141,6 +138,24 @@ int main(void)
 //
 //  Debug_write(debugBuffer, sizeof(debugBuffer));
 
+  char Buffer[32];
+
+  // ADS7280_writeCFR(0);
+
+  ADS7280_setDefault();
+  HAL_Delay(1);
+  ADS7280_writeCFR(0b01111111101);
+  uint16_t cfr = ADS7280_readCFR();
+
+  // ADS7280_selectInput0();
+
+  for (uint8_t i = 0; i < 10; i++) {
+    uint16_t data = ADS7280_readData();
+
+    sprintf(Buffer, "Data value: %d, cfr: %d\n", data, cfr);
+    CDC_Transmit_FS(Buffer, sizeof(Buffer));
+  }
+
   // lcd_init();
 	// lcd_clear();
 
@@ -152,7 +167,6 @@ int main(void)
 
   MCP3421_writeConfig(&hi2c1, &config);
   HAL_Delay(100);
-  char Buffer[25];
 
   /* USER CODE END 2 */
 
@@ -160,8 +174,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // setCursor(0,0);
-		// lcd_send_string("Hello LCD");
     // USBD_StatusTypeDef status = CDC_Transmit_FS(usbBuffer, sizeof(usbBuffer));
 
     // for (uint8_t i = 1; i<128; i++) {
@@ -172,8 +184,16 @@ int main(void)
     //     CDC_Transmit_FS(Buffer, sizeof(Buffer));
     //   }
     // }
-    uint32_t measurement = MCP3421_readMeasurement(&hi2c1);
-    sprintf(Buffer, "Measurement: %dmV\n", measurement);
+    // uint32_t measurement = MCP3421_readMeasurement(&hi2c1);
+    // sprintf(Buffer, "VIN: %dmV\n", measurement);
+
+    // CDC_Transmit_FS(Buffer, sizeof(Buffer));
+    // setCursor(0,0);
+		// lcd_send_string(Buffer);
+
+    uint16_t data = ADS7280_readData();
+
+    sprintf(Buffer, "Data value: %d\n", data);
     CDC_Transmit_FS(Buffer, sizeof(Buffer));
 
     HAL_Delay(100);
@@ -292,44 +312,6 @@ static void MX_SDIO_SD_Init(void)
 }
 
 /**
-  * @brief SPI1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI1_Init(void)
-{
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -347,42 +329,56 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, PATH_0_EN_Pin|PATH_1_EN_Pin|PATH_2_EN_Pin|PATH_3_EN_Pin
-                          |PATH_4_EN_Pin, GPIO_PIN_RESET);
+                          |PATH_4_EN_Pin|ADC_CLK_Pin|ADC_SDO_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, ADC_CS_Pin|SIGNAL_LED_1_Pin|ADC_INT_Pin|ADC_CONVST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, ADC_CS_Pin|ADC_CONVST_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SIGNAL_LED_1_GPIO_Port, SIGNAL_LED_1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SIGNAL_LED_2_Pin|SIGNAL_LED_3_Pin|SIGNAL_LED_4_Pin|SIGNAL_LED_5_Pin
                           |TEST_LOAD_1_Pin|TEST_LOAD_2_Pin|TEST_LOAD_3_Pin|TEST_LOAD_4_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : FAKE_CD_Pin */
-  GPIO_InitStruct.Pin = FAKE_CD_Pin;
+  /*Configure GPIO pins : FAKE_CD_Pin ADC_INT_Pin */
+  GPIO_InitStruct.Pin = FAKE_CD_Pin|ADC_INT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(FAKE_CD_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PATH_0_EN_Pin PATH_1_EN_Pin PATH_2_EN_Pin PATH_3_EN_Pin
-                           PATH_4_EN_Pin */
+                           PATH_4_EN_Pin ADC_CLK_Pin ADC_SDO_Pin */
   GPIO_InitStruct.Pin = PATH_0_EN_Pin|PATH_1_EN_Pin|PATH_2_EN_Pin|PATH_3_EN_Pin
-                          |PATH_4_EN_Pin;
+                          |PATH_4_EN_Pin|ADC_CLK_Pin|ADC_SDO_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : ADC_CS_Pin SIGNAL_LED_1_Pin ADC_INT_Pin ADC_CONVST_Pin */
-  GPIO_InitStruct.Pin = ADC_CS_Pin|SIGNAL_LED_1_Pin|ADC_INT_Pin|ADC_CONVST_Pin;
+  /*Configure GPIO pins : ADC_SDI_Pin DETECT_SD_CARD_Pin */
+  GPIO_InitStruct.Pin = ADC_SDI_Pin|DETECT_SD_CARD_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : ADC_CS_Pin SIGNAL_LED_1_Pin ADC_CONVST_Pin */
+  GPIO_InitStruct.Pin = ADC_CS_Pin|SIGNAL_LED_1_Pin|ADC_CONVST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SIGNAL_LED_2_Pin SIGNAL_LED_3_Pin SIGNAL_LED_4_Pin SIGNAL_LED_5_Pin
-                           TEST_LOAD_1_Pin TEST_LOAD_2_Pin TEST_LOAD_3_Pin TEST_LOAD_4_Pin */
-  GPIO_InitStruct.Pin = SIGNAL_LED_2_Pin|SIGNAL_LED_3_Pin|SIGNAL_LED_4_Pin|SIGNAL_LED_5_Pin
-                          |TEST_LOAD_1_Pin|TEST_LOAD_2_Pin|TEST_LOAD_3_Pin|TEST_LOAD_4_Pin;
+  /*Configure GPIO pins : SIGNAL_LED_2_Pin SIGNAL_LED_3_Pin SIGNAL_LED_4_Pin SIGNAL_LED_5_Pin */
+  GPIO_InitStruct.Pin = SIGNAL_LED_2_Pin|SIGNAL_LED_3_Pin|SIGNAL_LED_4_Pin|SIGNAL_LED_5_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : TEST_LOAD_1_Pin TEST_LOAD_2_Pin TEST_LOAD_3_Pin TEST_LOAD_4_Pin */
+  GPIO_InitStruct.Pin = TEST_LOAD_1_Pin|TEST_LOAD_2_Pin|TEST_LOAD_3_Pin|TEST_LOAD_4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -392,12 +388,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : DETECT_SD_CARD_Pin */
-  GPIO_InitStruct.Pin = DETECT_SD_CARD_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(DETECT_SD_CARD_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
