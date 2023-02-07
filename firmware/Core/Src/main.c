@@ -144,11 +144,16 @@ int main(void)
 
   // ADS7280_setDefault();
   // HAL_Delay(1);
-  ADS7280_writeCFR(0b011111111111);
-  HAL_Delay(1);
+  ADS7280_config adsCfg = { 0 };
+  ADS7280_readConfig(&adsCfg);
+
+  adsCfg.channelType = ADS7280_MANUAL_CHANNEL;
+
+  ADS7280_writeConfig(&adsCfg);
+
   uint16_t cfr = ADS7280_readCFR();
 
-  ADS7280_selectInput0();
+  ADS7280_selectInput1();
 
   for (uint8_t i = 0; i < 10; i++) {
     uint16_t data = ADS7280_readData();
