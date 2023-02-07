@@ -4,17 +4,19 @@
 uint16_t ADS7280_send4BitDataVariable(uint8_t data, uint8_t readLength) {
 	uint16_t result = 0;
 
-	HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 1);
+	HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 0);
 	HAL_GPIO_WritePin(ADC_CS_GPIO_Port, ADC_CS_Pin, 0);
 
+	uint8_t resultBit;
+
 	for (uint8_t i = 0; i < 4; i++) {
-		uint8_t dataBit = binary_getBit(data, 3 - i);
+		uint8_t dataBit = binary_getBit8(data, 3 - i);
 
 		HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 1);
 		HAL_GPIO_WritePin(ADC_SDO_GPIO_Port, ADC_SDO_Pin, dataBit);
 		HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 0);
-		uint8_t resultBit = HAL_GPIO_ReadPin(ADC_SDI_GPIO_Port, ADC_SDI_Pin);
 
+		resultBit = HAL_GPIO_ReadPin(ADC_SDI_GPIO_Port, ADC_SDI_Pin);
 		result = (result << 1) | resultBit;
 	}
 
@@ -23,9 +25,11 @@ uint16_t ADS7280_send4BitDataVariable(uint8_t data, uint8_t readLength) {
 	for (uint8_t i = 0; i < readLength - 4; i++) {
 		HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 1);
 		HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 0);
-		uint8_t resultBit = HAL_GPIO_ReadPin(ADC_SDI_GPIO_Port, ADC_SDI_Pin);
 
-		result = (result << 1) | resultBit;
+		if (i != readLength - 5) {
+			resultBit = HAL_GPIO_ReadPin(ADC_SDI_GPIO_Port, ADC_SDI_Pin);
+			result = (result << 1) | resultBit;
+		}
 	}
 
 	HAL_GPIO_WritePin(ADC_CS_GPIO_Port, ADC_CS_Pin, 1);
@@ -40,11 +44,11 @@ uint16_t ADS7280_send4BitData(uint8_t data) {
 uint16_t ADS7280_send16BitData(uint16_t data) {
 	uint16_t result = 0;
 
-	HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 1);
+	HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 0);
 	HAL_GPIO_WritePin(ADC_CS_GPIO_Port, ADC_CS_Pin, 0);
 
 	for (uint8_t i = 0; i < 16; i++) {
-		uint8_t dataBit = binary_getBit(data, 15 - i);
+		uint8_t dataBit = binary_getBit16(data, 15 - i);
 
 		HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 1);
 		HAL_GPIO_WritePin(ADC_SDO_GPIO_Port, ADC_SDO_Pin, dataBit);
@@ -86,7 +90,7 @@ uint16_t ADS7280_readData() {
 
 	uint16_t result = ADS7280_send4BitDataVariable(ADS7280_READ_DATA, 17);
 
-	return result >> 3;
+	return result >> 2;
 }
 
 void ADS7280_setDefault() {

@@ -142,12 +142,13 @@ int main(void)
 
   // ADS7280_writeCFR(0);
 
-  ADS7280_setDefault();
+  // ADS7280_setDefault();
+  // HAL_Delay(1);
+  ADS7280_writeCFR(0b011111111111);
   HAL_Delay(1);
-  ADS7280_writeCFR(0b01111111101);
   uint16_t cfr = ADS7280_readCFR();
 
-  // ADS7280_selectInput0();
+  ADS7280_selectInput0();
 
   for (uint8_t i = 0; i < 10; i++) {
     uint16_t data = ADS7280_readData();

@@ -29,10 +29,10 @@ void MCP3421_readI2C(I2C_HandleTypeDef * i2c, uint8_t* buffer) {
 }
 
 void MCP3421_setConfig(uint8_t configBin, MCP3421_config* config) {
-	config->ready = binary_getBit(configBin, 7);
-	config->mode = binary_getBit(configBin, 4);
-	config->sampleRate = (binary_getBit(configBin, 3) << 1) & binary_getBit(configBin, 2);
-	config->gain = (binary_getBit(configBin, 1) << 1) & binary_getBit(configBin, 0);
+	config->ready = binary_getBit8(configBin, 7);
+	config->mode = binary_getBit8(configBin, 4);
+	config->sampleRate = (binary_getBit8(configBin, 3) << 1) & binary_getBit8(configBin, 2);
+	config->gain = (binary_getBit8(configBin, 1) << 1) & binary_getBit8(configBin, 0);
 }
 
 void MCP3421_readConfig(I2C_HandleTypeDef * i2c, MCP3421_config* config) {
@@ -50,10 +50,10 @@ void MCP3421_writeConfig(I2C_HandleTypeDef * i2c, MCP3421_config* config) {
 
 	configBin = configBin | config->ready << 7;
 	configBin = configBin | config->mode << 4;
-	configBin = configBin | binary_getBit(config->sampleRate, 1) << 3;
-	configBin = configBin | binary_getBit(config->sampleRate, 0) << 2;
-	configBin = configBin | binary_getBit(config->gain, 1) << 1;
-	configBin = configBin | binary_getBit(config->gain, 0);
+	configBin = configBin | binary_getBit8(config->sampleRate, 1) << 3;
+	configBin = configBin | binary_getBit8(config->sampleRate, 0) << 2;
+	configBin = configBin | binary_getBit8(config->gain, 1) << 1;
+	configBin = configBin | binary_getBit8(config->gain, 0);
 
 	MCP3421_writeI2C(i2c, configBin);
 	MCP3421_setConfig(configBin, &currentConfig);
