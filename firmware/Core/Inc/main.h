@@ -110,6 +110,7 @@ void Error_Handler(void);
 #define USER_BTN_3_EXTI_IRQn EXTI15_10_IRQn
 #define DETECT_SD_CARD_Pin GPIO_PIN_15
 #define DETECT_SD_CARD_GPIO_Port GPIOA
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
