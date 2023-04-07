@@ -28,6 +28,7 @@
 #include "lcd_display.h"
 #include "mcp3421.h"
 #include "ads7280.h"
+#include "current_meter.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -170,7 +171,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint8_t currentInput = 0;
+
+  CurrentMeter_currentValue currentValue = { 0 };
+  uint8_t activePath = 255;
 
   while (1)
   {
@@ -186,18 +189,28 @@ int main(void)
     // }
 
     uint32_t measurement = MCP3421_readMeasurement(&hi2c1);
-    sprintf(Buffer, "V: %dmV       \n", measurement);
-    CDC_Transmit_FS(Buffer, sizeof(Buffer));
+    sprintf(Buffer, "V: %ldmV       \n", measurement);
+    CDC_Transmit_FS((uint8_t *) Buffer, sizeof(Buffer));
     lcd_setCursor(0,0);
 		lcd_send_string(Buffer);
 
-    uint16_t data = ADS7280_readData();
-    sprintf(Buffer, "I: %d         \n", data);
-    CDC_Transmit_FS(Buffer, sizeof(Buffer));
+    CurrentMeter_read(&currentValue);
+    // CurrentMeter_actualize();
+    uint8_t newPath = CurrentMeter_getActivePath();
+    sprintf(Buffer, "I: %d     ", currentValue.raw);
+    CDC_Transmit_FS((uint8_t *) Buffer, sizeof(Buffer));
     lcd_setCursor(0,1);
 		lcd_send_string(Buffer);
 
-    HAL_Delay(100);
+    if (newPath != activePath) {
+      sprintf(Buffer, "%d", newPath);
+      lcd_setCursor(15,1);
+      lcd_send_string(Buffer);
+
+      activePath = newPath;
+    }
+
+    HAL_Delay(1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -27,9 +27,9 @@
 #define PATH4_MA_UNIT			(ADS7280_UNIT_MV / SENSOR1_GAIN / PATH4_SHUNT)
 
 #define PATH0_TOP_LIMIT			16000
-#define PATH0_BOTTOM_LIMIT		4000
-#define PATH1_TOP_LIMIT			12000
-#define PATH1_BOTTOM_LIMIT		4000
+#define PATH0_BOTTOM_LIMIT		800
+#define PATH1_TOP_LIMIT			14000
+#define PATH1_BOTTOM_LIMIT		400
 #define PATH2_TOP_LIMIT			12000
 #define PATH2_BOTTOM_LIMIT		4000
 #define PATH3_TOP_LIMIT			12000
@@ -47,11 +47,13 @@
 #define PATH4_DEFAULT_TEST3		((uint16_t) (TEST3_MA/PATH4_MA_UNIT))
 
 enum currentResolution { A, mA, uA, nA, pA };
+// char currentResolutionString[5][2] = { "A ", "mA", "uA", "nA", "pA" };
 
-typedef struct currentValue {
+typedef struct CurrentMeter_currentValue {
 	float current;
 	enum currentResolution resolution;
-} currentValue;
+	uint16_t raw;
+} CurrentMeter_currentValue;
 
 typedef struct CurrentMeter_pathDetails {
 	float shunt;
@@ -67,50 +69,18 @@ typedef struct CurrentMeter_offset {
 
 typedef struct CurrentMeter_state {
 	uint8_t path;
-	uint8_t measurement;
+	uint16_t measurement;
 	uint8_t sensorInput;
 	uint8_t outputEnabled;
 	CurrentMeter_offset offsets[5];
 } CurrentMeter_state;
-
-static CurrentMeter_pathDetails pathDetails[] = {
-	{
-		shunt: PATH0_SHUNT,
-		maUnit: PATH0_MA_UNIT,
-		topLimit: PATH0_TOP_LIMIT,
-		bottomLimit: PATH0_BOTTOM_LIMIT
-	},
-	{
-		shunt: PATH1_SHUNT,
-		maUnit: PATH1_MA_UNIT,
-		topLimit: PATH1_TOP_LIMIT,
-		bottomLimit: PATH1_BOTTOM_LIMIT
-	},
-	{
-		shunt: PATH2_SHUNT,
-		maUnit: PATH2_MA_UNIT,
-		topLimit: PATH2_TOP_LIMIT,
-		bottomLimit: PATH2_BOTTOM_LIMIT
-	},
-	{
-		shunt: PATH3_SHUNT,
-		maUnit: PATH3_MA_UNIT,
-		topLimit: PATH3_TOP_LIMIT,
-		bottomLimit: PATH3_BOTTOM_LIMIT
-	},
-	{
-		shunt: PATH4_SHUNT,
-		maUnit: PATH4_MA_UNIT,
-		topLimit: PATH4_TOP_LIMIT,
-		bottomLimit: PATH4_BOTTOM_LIMIT
-	}
-};
 
 void CurrentMeter_actualize();
 void CurrentMeter_calibrate();
 void CurrentMeter_changePath(uint8_t newPath);
 void CurrentMeter_enable();
 void CurrentMeter_disable();
-void CurrentMeter_read(currentValue * value);
+void CurrentMeter_read(CurrentMeter_currentValue * value);
+uint8_t CurrentMeter_getActivePath();
 
 #endif /* INC_CURRENT_METER_H_ */

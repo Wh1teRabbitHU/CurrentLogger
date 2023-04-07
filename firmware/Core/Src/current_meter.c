@@ -1,5 +1,38 @@
 #include "current_meter.h"
 
+static CurrentMeter_pathDetails pathDetails[] = {
+	{
+		shunt: PATH0_SHUNT,
+		maUnit: PATH0_MA_UNIT,
+		topLimit: PATH0_TOP_LIMIT,
+		bottomLimit: PATH0_BOTTOM_LIMIT
+	},
+	{
+		shunt: PATH1_SHUNT,
+		maUnit: PATH1_MA_UNIT,
+		topLimit: PATH1_TOP_LIMIT,
+		bottomLimit: PATH1_BOTTOM_LIMIT
+	},
+	{
+		shunt: PATH2_SHUNT,
+		maUnit: PATH2_MA_UNIT,
+		topLimit: PATH2_TOP_LIMIT,
+		bottomLimit: PATH2_BOTTOM_LIMIT
+	},
+	{
+		shunt: PATH3_SHUNT,
+		maUnit: PATH3_MA_UNIT,
+		topLimit: PATH3_TOP_LIMIT,
+		bottomLimit: PATH3_BOTTOM_LIMIT
+	},
+	{
+		shunt: PATH4_SHUNT,
+		maUnit: PATH4_MA_UNIT,
+		topLimit: PATH4_TOP_LIMIT,
+		bottomLimit: PATH4_BOTTOM_LIMIT
+	}
+};
+
 static CurrentMeter_state _state = {
 	path: 0,
 	measurement: 0,
@@ -15,8 +48,12 @@ static CurrentMeter_state _state = {
 };
 
 void CurrentMeter_actualize() {
+	if (!_state.outputEnabled) {
+		return;
+	}
+
 	uint16_t topLimit = pathDetails[_state.path].topLimit;
-	uint16_t bottomLimit = pathDetails[_state.path].topLimit;
+	uint16_t bottomLimit = pathDetails[_state.path].bottomLimit;
 
 	if (_state.path == 0 && _state.measurement > topLimit) {
 		// TODO: Stop output and write error message
@@ -35,6 +72,10 @@ void CurrentMeter_calibrate() {
 }
 
 void CurrentMeter_setSensorInput(uint8_t input) {
+	if (_state.sensorInput == input) {
+		return;
+	}
+
 	if (input == 0) {
 		ADS7280_selectInput0();
 	} else {
@@ -65,9 +106,9 @@ void CurrentMeter_setPath(uint8_t path, uint8_t value) {
 }
 
 void CurrentMeter_changePath(uint8_t newPath) {
-	if (newPath == 0 && _state.sensorInput == 0) {
+	if (newPath == 0) {
 		CurrentMeter_setSensorInput(1);
-	} else if (newPath != 0 && _state.sensorInput == 1) {
+	} else {
 		CurrentMeter_setSensorInput(0);
 	}
 
@@ -89,10 +130,10 @@ void CurrentMeter_disable() {
 	_state.outputEnabled = 0;
 }
 
-void CurrentMeter_read(currentValue * value) {
-	float measurement = ADS7280_readData();
+void CurrentMeter_read(CurrentMeter_currentValue * value) {
+	int16_t measurement = ADS7280_readData();
 	int16_t offset = _state.offsets[_state.path].current;
-	float adjustedMeasurement = measurement + offset;
+	int16_t adjustedMeasurement = measurement + offset;
 	float current = adjustedMeasurement * pathDetails[_state.path].maUnit;
 
 	if (current > 1000) {
@@ -112,5 +153,10 @@ void CurrentMeter_read(currentValue * value) {
 		value->resolution = pA;
 	}
 
+	value->raw = adjustedMeasurement;
 	_state.measurement = adjustedMeasurement;
+}
+
+uint8_t CurrentMeter_getActivePath() {
+	return _state.path;
 }

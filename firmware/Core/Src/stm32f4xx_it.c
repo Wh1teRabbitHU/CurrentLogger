@@ -22,6 +22,7 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "current_meter.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -201,14 +202,31 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles EXTI line[9:5] interrupts.
   */
+uint8_t outputEnabled = 0;
+
 void EXTI9_5_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
-//  uint8_t btn1State = !HAL_GPIO_ReadPin(USER_BTN_1_GPIO_Port, USER_BTN_1_Pin);
-//  uint8_t btn2State = !HAL_GPIO_ReadPin(USER_BTN_2_GPIO_Port, USER_BTN_2_Pin);
+  uint8_t btn1State = !HAL_GPIO_ReadPin(USER_BTN_1_GPIO_Port, USER_BTN_1_Pin);
+  uint8_t btn2State = !HAL_GPIO_ReadPin(USER_BTN_2_GPIO_Port, USER_BTN_2_Pin);
 
-  HAL_GPIO_TogglePin(SIGNAL_LED_1_GPIO_Port, SIGNAL_LED_1_Pin);
-  HAL_GPIO_TogglePin(PATH_0_EN_GPIO_Port, PATH_0_EN_Pin);
+  if(btn1State) {
+    if (outputEnabled) {
+      CurrentMeter_disable();
+      HAL_GPIO_WritePin(SIGNAL_LED_1_GPIO_Port, SIGNAL_LED_1_Pin, 0);
+      outputEnabled = 0;
+    } else {
+      CurrentMeter_enable();
+      HAL_GPIO_WritePin(SIGNAL_LED_1_GPIO_Port, SIGNAL_LED_1_Pin, 1);
+      outputEnabled = 1;
+    }
+  }
+
+  if (btn2State) {
+    uint8_t currentPath = CurrentMeter_getActivePath();
+    CurrentMeter_changePath(currentPath + 1);
+  }
+
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(USER_BTN_1_Pin);
   HAL_GPIO_EXTI_IRQHandler(USER_BTN_2_Pin);
@@ -225,15 +243,8 @@ void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 //  uint8_t btn3State = !HAL_GPIO_ReadPin(USER_BTN_3_GPIO_Port, USER_BTN_3_Pin);
-  if (currentInput) {
-    currentInput = 0;
-    ADS7280_selectInput1();
-    HAL_GPIO_WritePin(SIGNAL_LED_2_GPIO_Port, SIGNAL_LED_2_Pin, 1);
-  } else {
-    currentInput = 1;
-    ADS7280_selectInput0();
-    HAL_GPIO_WritePin(SIGNAL_LED_2_GPIO_Port, SIGNAL_LED_2_Pin, 0);
-  }
+  uint8_t currentPath = CurrentMeter_getActivePath();
+  CurrentMeter_changePath(currentPath - 1);
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(USER_BTN_3_Pin);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */

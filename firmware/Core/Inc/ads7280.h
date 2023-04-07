@@ -47,8 +47,7 @@
 #define ADS7280_TAG_ENABLE_POS			1
 #define ADS7280_SYSTEM_RESET_POS		0
 
-#
-#define ADS7280_UNIT_MV					2500.0/16384.0
+#define ADS7280_UNIT_MV					2500.0/16384.0 // 0,152587
 
 typedef struct ADS7280_config {
 	uint8_t channelType;

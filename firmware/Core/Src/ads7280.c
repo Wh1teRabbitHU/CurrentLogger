@@ -1,8 +1,8 @@
 #include "binary.h"
 #include "ads7280.h"
 
-uint16_t ADS7280_send4BitDataVariable(uint8_t data, uint8_t readLength) {
-	uint16_t result = 0;
+uint32_t ADS7280_send4BitDataVariable(uint8_t data, uint8_t readLength) {
+	uint32_t result = 0;
 
 	HAL_GPIO_WritePin(ADC_CLK_GPIO_Port, ADC_CLK_Pin, 0);
 	HAL_GPIO_WritePin(ADC_CS_GPIO_Port, ADC_CS_Pin, 0);
@@ -121,7 +121,7 @@ uint16_t ADS7280_readData() {
 	while (HAL_GPIO_ReadPin(ADC_INT_GPIO_Port, ADC_INT_Pin) == 1);
 
 	// uint16_t result = ADS7280_send4BitData(ADS7280_READ_DATA);
-	uint16_t result = ADS7280_send4BitDataVariable(ADS7280_READ_DATA, 17);
+	uint32_t result = ADS7280_send4BitDataVariable(ADS7280_READ_DATA, 17);
 
 	return result >> 2;
 }
@@ -130,7 +130,7 @@ void ADS7280_setDefault() {
 	ADS7280_send4BitData(ADS7280_DEFAULT_MODE);
 }
 
-float ADS7280_readVoltage() {
+uint16_t ADS7280_readCurrent() {
 	uint16_t rawData = ADS7280_readData();
 
 	return ADS7280_UNIT_MV * rawData;
