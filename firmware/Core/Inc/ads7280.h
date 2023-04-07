@@ -47,6 +47,9 @@
 #define ADS7280_TAG_ENABLE_POS			1
 #define ADS7280_SYSTEM_RESET_POS		0
 
+#
+#define ADS7280_UNIT_MV					2500.0/16384.0
+
 typedef struct ADS7280_config {
 	uint8_t channelType;
 	uint8_t cclkSource;
@@ -67,5 +70,6 @@ uint16_t ADS7280_readCFR();
 void ADS7280_writeCFR(uint16_t cfr);
 
 uint16_t ADS7280_readData();
+float ADS7280_readVoltage();
 
 #endif

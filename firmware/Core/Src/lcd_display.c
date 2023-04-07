@@ -69,7 +69,7 @@ void lcd_init (void)
 	lcd_send_cmd (0x0C); //Display on/off control --> D = 1, C and B = 0. (Cursor and blink, last two bits)
 }
 
-void setCursor(int a, int b)
+void lcd_setCursor(int a, int b)
 {
 	int i=0;
 	switch(b){

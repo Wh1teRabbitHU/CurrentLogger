@@ -118,6 +118,9 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
+  lcd_init();
+	lcd_clear();
+
 //  SDCard_capacity capacity = {0};
 //
 //  SDCard_mount("/");
@@ -138,32 +141,21 @@ int main(void)
 //
 //  Debug_write(debugBuffer, sizeof(debugBuffer));
 
+  // Current Meter
+
   char Buffer[32];
 
-  // ADS7280_writeCFR(0);
-
-  // ADS7280_setDefault();
-  // HAL_Delay(1);
   ADS7280_config adsCfg = { 0 };
   ADS7280_readConfig(&adsCfg);
 
   adsCfg.channelType = ADS7280_MANUAL_CHANNEL;
+  adsCfg.triggerMode = ADS7280_MANUAL_TRIGGER;
 
   ADS7280_writeConfig(&adsCfg);
-
-  uint16_t cfr = ADS7280_readCFR();
-
+  ADS7280_readConfig(&adsCfg);
   ADS7280_selectInput1();
 
-  for (uint8_t i = 0; i < 10; i++) {
-    uint16_t data = ADS7280_readData();
-
-    sprintf(Buffer, "Data value: %d, cfr: %d\n", data, cfr);
-    CDC_Transmit_FS(Buffer, sizeof(Buffer));
-  }
-
-  // lcd_init();
-	// lcd_clear();
+  // Voltage meter
 
   MCP3421_config config = {0};
 
@@ -178,6 +170,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint8_t currentInput = 0;
+
   while (1)
   {
     // USBD_StatusTypeDef status = CDC_Transmit_FS(usbBuffer, sizeof(usbBuffer));
@@ -190,17 +184,18 @@ int main(void)
     //     CDC_Transmit_FS(Buffer, sizeof(Buffer));
     //   }
     // }
-    // uint32_t measurement = MCP3421_readMeasurement(&hi2c1);
-    // sprintf(Buffer, "VIN: %dmV\n", measurement);
 
-    // CDC_Transmit_FS(Buffer, sizeof(Buffer));
-    // setCursor(0,0);
-		// lcd_send_string(Buffer);
+    uint32_t measurement = MCP3421_readMeasurement(&hi2c1);
+    sprintf(Buffer, "V: %dmV       \n", measurement);
+    CDC_Transmit_FS(Buffer, sizeof(Buffer));
+    lcd_setCursor(0,0);
+		lcd_send_string(Buffer);
 
     uint16_t data = ADS7280_readData();
-
-    sprintf(Buffer, "Data value: %d\n", data);
+    sprintf(Buffer, "I: %d         \n", data);
     CDC_Transmit_FS(Buffer, sizeof(Buffer));
+    lcd_setCursor(0,1);
+		lcd_send_string(Buffer);
 
     HAL_Delay(100);
     /* USER CODE END WHILE */

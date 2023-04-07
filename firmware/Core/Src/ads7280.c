@@ -120,6 +120,7 @@ uint16_t ADS7280_readData() {
 
 	while (HAL_GPIO_ReadPin(ADC_INT_GPIO_Port, ADC_INT_Pin) == 1);
 
+	// uint16_t result = ADS7280_send4BitData(ADS7280_READ_DATA);
 	uint16_t result = ADS7280_send4BitDataVariable(ADS7280_READ_DATA, 17);
 
 	return result >> 2;
@@ -127,4 +128,10 @@ uint16_t ADS7280_readData() {
 
 void ADS7280_setDefault() {
 	ADS7280_send4BitData(ADS7280_DEFAULT_MODE);
+}
+
+float ADS7280_readVoltage() {
+	uint16_t rawData = ADS7280_readData();
+
+	return ADS7280_UNIT_MV * rawData;
 }

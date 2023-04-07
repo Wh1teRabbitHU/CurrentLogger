@@ -220,10 +220,20 @@ void EXTI9_5_IRQHandler(void)
 /**
   * @brief This function handles EXTI line[15:10] interrupts.
   */
+uint8_t currentInput = 0;
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 //  uint8_t btn3State = !HAL_GPIO_ReadPin(USER_BTN_3_GPIO_Port, USER_BTN_3_Pin);
+  if (currentInput) {
+    currentInput = 0;
+    ADS7280_selectInput1();
+    HAL_GPIO_WritePin(SIGNAL_LED_2_GPIO_Port, SIGNAL_LED_2_Pin, 1);
+  } else {
+    currentInput = 1;
+    ADS7280_selectInput0();
+    HAL_GPIO_WritePin(SIGNAL_LED_2_GPIO_Port, SIGNAL_LED_2_Pin, 0);
+  }
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(USER_BTN_3_Pin);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
