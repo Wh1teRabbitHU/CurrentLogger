@@ -35,3 +35,5 @@ firmware/Debug
 firmware/build
 
 *.bak
+
+firmware/.vscode/**
